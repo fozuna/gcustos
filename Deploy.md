@@ -8,7 +8,11 @@ Este documento descreve como publicar o GCustos em produção e as verificaçõe
 - Apache (com suporte a `.htaccess`)
 
 ## Configuração de banco
-Atualize `config.php` com as credenciais de produção. No Hostinger geralmente o `DB_HOST` é `localhost`.
+NÃO commite credenciais reais. Use `config.example.php` como base e mantenha `config.php` fora do Git.
+
+Passos:
+1. Copie `config.example.php` para `config.php`.
+2. Edite `config.php` com suas credenciais de produção (em Hostinger, `DB_HOST` costuma ser `localhost`):
 
 ```php
 define('DB_HOST', 'localhost');
@@ -30,6 +34,7 @@ define('DB_PASS', 'XiYs6AT6a#pBabh');
 - `.htaccess` na raiz desabilita listagem de diretórios e bloqueia acesso a arquivos sensíveis.
 - `.htaccess` em `classes/` impede acesso HTTP aos arquivos da camada de dados.
 - Páginas protegidas checam sessão via `require_auth()` em `init.php`.
+ - `config.php` está ignorado no Git via `.gitignore`. Versione apenas `config.example.php`.
 
 ### HTTPS (opcional)
 Recomendado forçar HTTPS no servidor. Caso necessário, adicione redirecionamento em `.htaccess`.

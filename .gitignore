@@ -1,0 +1,5 @@
+# Ignore sensitive or environment-specific files
+config.php
+.env
+.DS_Store
+Thumbs.db
