@@ -1,0 +1,10 @@
+# Desabilita listagem de diretórios
+Options -Indexes
+
+# Bloqueia acesso direto a arquivos sensíveis
+<FilesMatch "^(config\.php|init\.php)$">
+  Require all denied
+</FilesMatch>
+
+# Bloqueia acesso HTTP ao diretório de classes
+RedirectMatch 404 ^/classes/.*$
