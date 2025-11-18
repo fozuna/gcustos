@@ -10,22 +10,22 @@ require_once __DIR__ . '/classes/Cost.php';
 require_once __DIR__ . '/classes/Supplier.php';
 require_once __DIR__ . '/classes/Client.php';
 require_once __DIR__ . '/classes/Receipt.php';
-require_once __DIR__ . '/classes/CostCenter.php';
+require_once __DIR__ . '/classes/costcenter.php';
 
 // Inicializa banco e tabelas
 Database::initialize();
 
 // Seed dos grupos padrão apenas na primeira execução (quando não há grupos)
 $defaultGroups = [
-    'encargos',
-    'salários',
-    'mão de obra',
-    'custos operacionais',
-    'materiais',
-    'locação',
-    'máquinas e veículos',
-    'empreiteiros',
-    'pneus'
+    'Encargos',
+    'Salários',
+    'Mão de Obra',
+    'Custos Operacionais',
+    'Materiais',
+    'Locação',
+    'Máquinas e Veículos',
+    'Empreiteiros',
+    'Pneus'
 ];
 if (CostGroup::countAll() === 0) {
     CostGroup::seedDefaults($defaultGroups);

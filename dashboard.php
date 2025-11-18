@@ -77,7 +77,7 @@ ob_start();
         <?php if (!empty($summary)): ?>
           <?php foreach ($summary as $row): ?>
             <div class="flex items-center justify-between py-1">
-              <span class="text-brand-800"><?= h($row['group_name']) ?></span>
+              <span class="text-brand-800 capitalize"><?= h($row['group_name']) ?></span>
               <span class="text-brand-900 font-medium"><?= h(format_currency((float)($row['total'] ?? 0))) ?></span>
             </div>
           <?php endforeach; ?>

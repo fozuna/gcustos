@@ -27,7 +27,6 @@ $hasUsers = User::countAll() > 0;
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title><?= h(APP_NAME) ?> · Login</title>
-    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <script>
       tailwind.config = {
         theme: {
@@ -41,11 +40,22 @@ $hasUsers = User::countAll() > 0;
         }
       }
     </script>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
-    <style> body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; } </style>
+    <style>
+      body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+      .bg-brand-50{background-color:#eff6ff}
+      .text-brand-700{color:#1d4ed8}
+      .text-brand-800{color:#1e40af}
+      .text-brand-900{color:#1e3a8a}
+      .border-brand-100{border-color:#dbeafe}
+      .border-brand-300{border-color:#93c5fd}
+      .bg-brand-700{background-color:#1d4ed8}
+      .hover\:bg-brand-800:hover{background-color:#1e40af}
+    </style>
   </head>
 <body class="min-h-screen bg-brand-50 flex items-center justify-center">
   <div class="w-full max-w-md bg-white shadow-xl rounded-xl p-8 border border-brand-100">

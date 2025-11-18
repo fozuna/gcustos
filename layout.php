@@ -9,7 +9,6 @@ function render_layout(string $title, string $content): void {
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title><?= h(APP_NAME) ?> · <?= h($title) ?></title>
-  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
   <script>
     tailwind.config = {
       theme: {
@@ -21,11 +20,66 @@ function render_layout(string $title, string $content): void {
       }
     }
   </script>
+  <script src="https://cdn.tailwindcss.com?plugins=forms,typography,aspect-ratio"></script>
   <link rel="preconnect" href="https://fonts.bunny.net">
   <link href="https://fonts.bunny.net/css?family=inter:400,500,600,700" rel="stylesheet" />
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
-  <style> body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; } </style>
+  <style>
+    body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+    .capitalize{ text-transform: capitalize; }
+    .bg-brand-50{background-color:#eff6ff}
+    .text-brand-700{color:#1d4ed8}
+    .text-brand-800{color:#1e40af}
+    .text-brand-900{color:#1e3a8a}
+    .border-brand-100{border-color:#dbeafe}
+    .border-brand-200{border-color:#bfdbfe}
+    .border-brand-300{border-color:#93c5fd}
+    .bg-brand-700{background-color:#1d4ed8}
+    .bg-brand-800{background-color:#1e40af}
+    .bg-brand-900{background-color:#1e3a8a}
+    .hover\:bg-brand-800:hover{background-color:#1e40af}
+    .bg-white{background-color:#ffffff}
+    .text-brand-100{color:#e2e8ff}
+    .border{border-width:1px}
+    .rounded-md{border-radius:0.375rem}
+    .rounded-lg{border-radius:0.5rem}
+    .rounded-xl{border-radius:0.75rem}
+    .text-sm{font-size:0.875rem;line-height:1.25rem}
+    .text-2xl{font-size:1.5rem;line-height:2rem}
+    .font-semibold{font-weight:600}
+    .font-medium{font-weight:500}
+    .flex{display:flex}
+    .items-center{align-items:center}
+    .justify-between{justify-content:space-between}
+    .space-y-1>*+*{margin-top:0.25rem}
+    .space-y-2>*+*{margin-top:0.5rem}
+    .space-y-3>*+*{margin-top:0.75rem}
+    .gap-2{gap:0.5rem}
+    .gap-3{gap:0.75rem}
+    .gap-6{gap:1.5rem}
+    .p-4{padding:1rem}
+    .p-6{padding:1.5rem}
+    .px-3{padding-left:0.75rem;padding-right:0.75rem}
+    .py-2{padding-top:0.5rem;padding-bottom:0.5rem}
+    .mt-1{margin-top:0.25rem}
+    .mb-2{margin-bottom:0.5rem}
+    .mb-3{margin-bottom:0.75rem}
+    .pt-3{padding-top:0.75rem}
+    .fixed{position:fixed}
+    .inset-y-0{top:0;bottom:0}
+    .left-0{left:0}
+    .w-64{width:16rem}
+    .w-10{width:2.5rem}
+    .h-10{height:2.5rem}
+    .w-5{width:1.25rem}
+    .h-5{height:1.25rem}
+    .min-h-screen{min-height:100vh}
+    .ml-64{margin-left:16rem}
+    .aspect-\[2\/1\]{position:relative;width:100%;padding-bottom:50%}
+    .aspect-\[2\/1\]>*{position:absolute;inset:0}
+    a{color:inherit;text-decoration:none}
+  </style>
 </head>
 <body class="min-h-screen bg-brand-50">
   <!-- Sidebar fixo -->

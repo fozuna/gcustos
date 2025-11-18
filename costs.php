@@ -1,4 +1,3 @@
-// c:\xampp\htdocs\gcustos\gcustos\costs.php
 <?php
 require_once __DIR__ . '/init.php';
 require_auth();
@@ -126,7 +125,7 @@ ob_start();
       </div>
       <div>
         <label class="block text-sm font-medium text-brand-800">Grupo de custos</label>
-        <select name="group_id" required class="mt-1 w-full rounded-lg border border-brand-300 bg-brand-50 text-brand-900 focus:border-brand-500 focus:ring-brand-500 px-3 py-2">
+        <select name="group_id" required class="mt-1 w-full rounded-lg border border-brand-300 bg-brand-50 text-brand-900 focus:border-brand-500 focus:ring-brand-500 px-3 py-2 capitalize">
           <option value="">Selecione um grupo</option>
           <?php foreach ($groups as $g): $sel = ($editCost && (int)$editCost['group_id'] === (int)$g['id']) ? 'selected' : ''; ?>
             <option value="<?= (int)$g['id'] ?>" <?= $sel ?>><?= h($g['name']) ?></option>
