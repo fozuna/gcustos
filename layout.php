@@ -1,6 +1,7 @@
 <?php
 // Componente simples de layout com sidebar à esquerda
 function render_layout(string $title, string $content): void {
+    $version = defined('APP_VERSION') ? APP_VERSION : '1.0.0';
     ?>
 <!DOCTYPE html>
 <html lang="pt-BR">
@@ -27,9 +28,8 @@ function render_layout(string $title, string $content): void {
   <style> body { font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, sans-serif; } </style>
 </head>
 <body class="min-h-screen bg-brand-50">
-  <div class="flex">
-    <!-- Sidebar -->
-    <aside class="w-64 min-h-screen bg-brand-900 text-brand-100 sticky top-0">
+  <!-- Sidebar fixo -->
+  <aside class="fixed inset-y-0 left-0 w-64 bg-brand-900 text-brand-100">
       <div class="p-4 border-b border-brand-800">
         <div class="flex items-center gap-3">
           <div class="w-10 h-10 rounded-md bg-brand-700 flex items-center justify-center">
@@ -48,6 +48,18 @@ function render_layout(string $title, string $content): void {
         <a href="costs.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="plus-circle" class="w-5 h-5"></i> <span>Lançar custo</span>
         </a>
+        <a href="receipts.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="banknote" class="w-5 h-5"></i> <span>Lançar receita</span>
+        </a>
+        <a href="cashflow.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="wallet" class="w-5 h-5"></i> <span>Fluxo de caixa</span>
+        </a>
+        <a href="clients.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="contact" class="w-5 h-5"></i> <span>Clientes</span>
+        </a>
+        <a href="suppliers.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="truck" class="w-5 h-5"></i> <span>Fornecedores</span>
+        </a>
         <a href="groups.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="folder-cog" class="w-5 h-5"></i> <span>Grupos</span>
         </a>
@@ -63,12 +75,19 @@ function render_layout(string $title, string $content): void {
       </nav>
     </aside>
 
-    <!-- Conteúdo -->
-    <main class="flex-1 min-h-screen">
+  <!-- Área de conteúdo deslocada pela sidebar fixa -->
+  <div class="ml-64 min-h-screen flex flex-col">
+    <main class="flex-1">
       <div class="p-6">
         <?= $content ?>
       </div>
     </main>
+    <footer class="border-t border-brand-200 bg-white text-brand-800 text-sm px-6 py-3">
+      <div class="flex items-center justify-between">
+        <span><?= h(APP_NAME) ?></span>
+        <span>Versão <?= h($version) ?></span>
+      </div>
+    </footer>
   </div>
   <script>lucide.createIcons();</script>
 </body>

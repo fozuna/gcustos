@@ -12,13 +12,41 @@ NÃO commite credenciais reais. Use `config.example.php` como base e mantenha `c
 
 Passos:
 1. Copie `config.example.php` para `config.php`.
-2. Edite `config.php` com suas credenciais de produção (em Hostinger, `DB_HOST` costuma ser `localhost`):
+2. Edite `config.php` com suas credenciais de produção (em Hostinger, `DB_HOST` costuma ser `localhost`). NUNCA coloque credenciais reais no Git. Use variáveis de ambiente ou um arquivo `.env` não versionado.
+
+### Ambientes e variáveis
+- O `config.example.php` detecta automaticamente o ambiente:
+  - `development` quando o host contém `localhost` ou `.local`.
+  - `production` caso contrário.
+- Você pode forçar com `APP_ENV` e definir `DB_HOST`, `DB_NAME`, `DB_USER`, `DB_PASS`.
+
+Opção A: `.env` (não versionado)
+
+```
+APP_ENV=production
+DB_HOST=localhost
+DB_NAME=SEU_DB_NAME
+DB_USER=SEU_DB_USER
+DB_PASS=SUA_SENHA_SEGURA
+```
+
+Opção B: Apache `SetEnv` (no servidor)
+
+```
+SetEnv APP_ENV production
+SetEnv DB_HOST localhost
+SetEnv DB_NAME SEU_DB_NAME
+SetEnv DB_USER SEU_DB_USER
+SetEnv DB_PASS SUA_SENHA_SEGURA
+```
+
+Opção C: `config.php` local ao servidor (não versionado)
 
 ```php
 define('DB_HOST', 'localhost');
-define('DB_NAME', 'u357871217_gcustos');
-define('DB_USER', 'u357871217_traxterg');
-define('DB_PASS', 'XiYs6AT6a#pBabh');
+define('DB_NAME', 'SEU_DB_NAME');
+define('DB_USER', 'SEU_DB_USER');
+define('DB_PASS', 'SUA_SENHA_SEGURA');
 ```
 
 ## Publicação
@@ -35,6 +63,7 @@ define('DB_PASS', 'XiYs6AT6a#pBabh');
 - `.htaccess` em `classes/` impede acesso HTTP aos arquivos da camada de dados.
 - Páginas protegidas checam sessão via `require_auth()` em `init.php`.
  - `config.php` está ignorado no Git via `.gitignore`. Versione apenas `config.example.php`.
+ - Para produção, defina variáveis de ambiente via painel do host ou `SetEnv`. Evite versionar segredos.
 
 ### HTTPS (opcional)
 Recomendado forçar HTTPS no servidor. Caso necessário, adicione redirecionamento em `.htaccess`.

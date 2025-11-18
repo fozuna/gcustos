@@ -8,3 +8,17 @@ Options -Indexes
 
 # Bloqueia acesso HTTP ao diretório de classes
 RedirectMatch 404 ^/classes/.*$
+
+# ===== Ambiente (produção) — Template de variáveis =====
+# ATENÇÃO: Este bloco é apenas um exemplo. NÃO comite segredos.
+# No servidor de produção, você pode definir variáveis via Apache:
+#
+# <IfModule mod_env.c>
+#   SetEnv APP_ENV production
+#   SetEnv DB_HOST localhost
+#   SetEnv DB_NAME SEU_DB_NAME
+#   SetEnv DB_USER SEU_DB_USER
+#   SetEnv DB_PASS SUA_SENHA_SEGURA
+# </IfModule>
+#
+# Alternativamente, use um arquivo .env (não versionado) com as mesmas chaves.

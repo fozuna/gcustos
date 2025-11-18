@@ -2,14 +2,36 @@
 require_once __DIR__ . '/init.php';
 require_auth();
 
-$message = null; $error = null;
+$message = null; $error = null; $editGroup = null;
+
+// Carregar grupo para edição
+if (isset($_GET['edit'])) {
+    $gid = (int)$_GET['edit'];
+    $g = CostGroup::findById($gid);
+    if ($g) { $editGroup = $g; } else { $error = 'Grupo não encontrado.'; }
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $name = trim($_POST['name'] ?? '');
-    if ($name) {
-        if (CostGroup::create($name)) $message = 'Grupo criado com sucesso!';
-        else $error = 'Falha ao criar grupo (talvez já exista).';
+    // Exclusão
+    if (isset($_POST['delete_id'])) {
+        $delId = (int)$_POST['delete_id'];
+        if (CostGroup::delete($delId)) { $message = 'Grupo excluído com sucesso!'; }
+        else { $error = 'Falha ao excluir grupo (há custos vinculados ou erro de banco).'; }
     } else {
-        $error = 'Informe um nome de grupo.';
+        $name = trim($_POST['name'] ?? '');
+        $action = $_POST['action'] ?? 'create';
+        if ($name) {
+            if ($action === 'update' && isset($_POST['group_id'])) {
+                $gid = (int)$_POST['group_id'];
+                if (CostGroup::update($gid, $name)) { $message = 'Grupo atualizado com sucesso!'; $editGroup = null; }
+                else { $error = 'Falha ao atualizar grupo.'; }
+            } else {
+                if (CostGroup::create($name)) $message = 'Grupo criado com sucesso!';
+                else $error = 'Falha ao criar grupo (talvez já exista).';
+            }
+        } else {
+            $error = 'Informe um nome de grupo.';
+        }
     }
 }
 
@@ -34,11 +56,22 @@ ob_start();
 
   <div class="bg-white rounded-xl shadow border border-brand-100 p-6">
     <form method="post" class="flex items-end gap-3">
+      <?php if ($editGroup): ?>
+        <input type="hidden" name="action" value="update" />
+        <input type="hidden" name="group_id" value="<?= (int)$editGroup['id'] ?>" />
+      <?php else: ?>
+        <input type="hidden" name="action" value="create" />
+      <?php endif; ?>
       <div class="flex-1">
         <label class="block text-sm font-medium text-brand-800">Nome do grupo</label>
-        <input type="text" name="name" required class="mt-1 w-full rounded-lg border border-brand-300 bg-brand-50 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:ring-brand-500 px-3 py-2" placeholder="Ex.: materiais" />
+        <input type="text" name="name" required class="mt-1 w-full rounded-lg border border-brand-300 bg-brand-50 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:ring-brand-500 px-3 py-2" placeholder="Ex.: materiais" value="<?= h($editGroup['name'] ?? '') ?>" />
       </div>
-      <button type="submit" class="px-4 py-2 rounded-lg bg-brand-700 text-white hover:bg-brand-800">Adicionar</button>
+      <?php if ($editGroup): ?>
+        <a href="groups.php" class="px-3 py-2 rounded-lg border border-brand-300 text-brand-800">Cancelar</a>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-brand-700 text-white hover:bg-brand-800">Atualizar</button>
+      <?php else: ?>
+        <button type="submit" class="px-4 py-2 rounded-lg bg-brand-700 text-white hover:bg-brand-800">Adicionar</button>
+      <?php endif; ?>
     </form>
   </div>
 
@@ -48,6 +81,13 @@ ob_start();
       <?php foreach ($groups as $g): ?>
         <li class="py-2 flex items-center justify-between">
           <span class="text-brand-900"><?= h($g['name']) ?></span>
+          <div class="flex items-center gap-2">
+            <a href="groups.php?edit=<?= (int)$g['id'] ?>" class="px-2 py-1 rounded-md border border-brand-300 text-brand-800 hover:bg-brand-50">Editar</a>
+            <form method="post" onsubmit="return confirm('Confirma excluir este grupo?');">
+              <input type="hidden" name="delete_id" value="<?= (int)$g['id'] ?>" />
+              <button type="submit" class="px-2 py-1 rounded-md border border-red-300 text-red-700 hover:bg-red-50">Excluir</button>
+            </form>
+          </div>
         </li>
       <?php endforeach; ?>
     </ul>
