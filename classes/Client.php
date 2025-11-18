@@ -27,9 +27,7 @@ class Client {
 
     public static function delete(int $id): bool {
         $pdo = Database::connection();
-        // bloqueia exclusão quando há recebimentos vinculados
-        $count = (int)$pdo->prepare('SELECT COUNT(*) FROM receipts WHERE client_id = ?')->execute([$id]) ?: 0;
-        // A execução acima não retorna fetch; precisamos fazer corretamente
+        // Bloqueia exclusão quando há recebimentos vinculados
         $stmt = $pdo->prepare('SELECT COUNT(*) FROM receipts WHERE client_id = ?');
         $stmt->execute([$id]);
         $count = (int)$stmt->fetchColumn();

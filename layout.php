@@ -69,6 +69,9 @@ function render_layout(string $title, string $content): void {
         <a href="users.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="users" class="w-5 h-5"></i> <span>Usuários</span>
         </a>
+        <a href="sobre.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="info" class="w-5 h-5"></i> <span>Sobre</span>
+        </a>
         <a href="logout.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="log-out" class="w-5 h-5"></i> <span>Sair</span>
         </a>

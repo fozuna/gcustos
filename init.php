@@ -14,7 +14,7 @@ require_once __DIR__ . '/classes/Receipt.php';
 // Inicializa banco e tabelas
 Database::initialize();
 
-// Seed dos grupos padrão (se ainda não existirem)
+// Seed dos grupos padrão apenas na primeira execução (quando não há grupos)
 $defaultGroups = [
     'encargos',
     'salários',
@@ -26,7 +26,9 @@ $defaultGroups = [
     'empreiteiros',
     'pneus'
 ];
-CostGroup::seedDefaults($defaultGroups);
+if (CostGroup::countAll() === 0) {
+    CostGroup::seedDefaults($defaultGroups);
+}
 
 // Cria usuário padrão na primeira execução (apenas se nenhum existir)
 if (User::countAll() === 0) {

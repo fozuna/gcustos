@@ -1,5 +1,10 @@
 <?php
 class CostGroup {
+    public static function countAll(): int {
+        $pdo = Database::connection();
+        $count = (int)$pdo->query('SELECT COUNT(*) FROM cost_groups')->fetchColumn();
+        return $count;
+    }
     public static function all(): array {
         $pdo = Database::connection();
         return $pdo->query('SELECT id, name FROM cost_groups ORDER BY name')->fetchAll();
@@ -35,12 +40,15 @@ class CostGroup {
 
     public static function delete(int $id): bool {
         $pdo = Database::connection();
+        // Bloqueia exclusão se existirem custos vinculados ao grupo
+        $stmtCnt = $pdo->prepare('SELECT COUNT(*) FROM costs WHERE group_id = ?');
+        $stmtCnt->execute([$id]);
+        $count = (int)$stmtCnt->fetchColumn();
+        if ($count > 0) { return false; }
+
         $stmt = $pdo->prepare('DELETE FROM cost_groups WHERE id = ?');
-        try {
-            return $stmt->execute([$id]);
-        } catch (\PDOException $e) {
-            return false;
-        }
+        try { return $stmt->execute([$id]); }
+        catch (\PDOException $e) { return false; }
     }
 
     public static function seedDefaults(array $names): void {

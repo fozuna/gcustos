@@ -29,7 +29,12 @@ class Supplier {
 
     public static function delete(int $id): bool {
         $pdo = Database::connection();
-        // Não permite excluir se estiver vinculado a costs (FK já protege, mas tratamos mensagem)
+        // Bloqueia exclusão se houver custos vinculados
+        $stmtCnt = $pdo->prepare('SELECT COUNT(*) FROM costs WHERE supplier_id = ?');
+        $stmtCnt->execute([$id]);
+        $count = (int)$stmtCnt->fetchColumn();
+        if ($count > 0) { return false; }
+
         $stmt = $pdo->prepare('DELETE FROM suppliers WHERE id = ?');
         try { return $stmt->execute([$id]); }
         catch (\PDOException $e) { return false; }

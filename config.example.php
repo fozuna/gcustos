@@ -38,7 +38,7 @@ if (APP_ENV === 'development') {
 
 // Configurações gerais
 define('APP_NAME', 'GCustos');
-define('APP_VERSION', getenv('APP_VERSION') ?: '1.0.0');
+define('APP_VERSION', getenv('APP_VERSION') ?: '1.1.25');
 
 // BASE_URL automático conforme subpasta
 $script = $_SERVER['SCRIPT_NAME'] ?? '/';
