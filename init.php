@@ -10,6 +10,7 @@ require_once __DIR__ . '/classes/Cost.php';
 require_once __DIR__ . '/classes/Supplier.php';
 require_once __DIR__ . '/classes/Client.php';
 require_once __DIR__ . '/classes/Receipt.php';
+require_once __DIR__ . '/classes/CostCenter.php';
 
 // Inicializa banco e tabelas
 Database::initialize();

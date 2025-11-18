@@ -2,27 +2,27 @@
 class Cost {
     public static function findById(int $id): ?array {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('SELECT id, user_id, group_id, supplier_id, cost_date, description, amount FROM costs WHERE id = ? LIMIT 1');
+        $stmt = $pdo->prepare('SELECT id, user_id, group_id, supplier_id, cost_center_id, cost_date, description, amount FROM costs WHERE id = ? LIMIT 1');
         $stmt->execute([$id]);
         $row = $stmt->fetch();
         return $row ?: null;
     }
 
-    public static function create(int $userId, int $groupId, ?int $supplierId, string $date, string $description, float $amount): bool {
+    public static function create(int $userId, int $groupId, ?int $supplierId, ?int $centerId, string $date, string $description, float $amount): bool {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('INSERT INTO costs (user_id, group_id, supplier_id, cost_date, description, amount) VALUES (?, ?, ?, ?, ?, ?)');
+        $stmt = $pdo->prepare('INSERT INTO costs (user_id, group_id, supplier_id, cost_center_id, cost_date, description, amount) VALUES (?, ?, ?, ?, ?, ?, ?)');
         try {
-            return $stmt->execute([$userId, $groupId, $supplierId, $date, trim($description), $amount]);
+            return $stmt->execute([$userId, $groupId, $supplierId, $centerId, $date, trim($description), $amount]);
         } catch (\PDOException $e) {
             return false;
         }
     }
 
-    public static function update(int $id, int $userId, int $groupId, ?int $supplierId, string $date, string $description, float $amount): bool {
+    public static function update(int $id, int $userId, int $groupId, ?int $supplierId, ?int $centerId, string $date, string $description, float $amount): bool {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('UPDATE costs SET user_id = ?, group_id = ?, supplier_id = ?, cost_date = ?, description = ?, amount = ? WHERE id = ?');
+        $stmt = $pdo->prepare('UPDATE costs SET user_id = ?, group_id = ?, supplier_id = ?, cost_center_id = ?, cost_date = ?, description = ?, amount = ? WHERE id = ?');
         try {
-            return $stmt->execute([$userId, $groupId, $supplierId, $date, trim($description), $amount, $id]);
+            return $stmt->execute([$userId, $groupId, $supplierId, $centerId, $date, trim($description), $amount, $id]);
         } catch (\PDOException $e) {
             return false;
         }

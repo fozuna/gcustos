@@ -1,9 +1,9 @@
 <?php
 class Receipt {
-    public static function create(int $userId, int $clientId, string $date, float $amount, ?string $notes): bool {
+    public static function create(int $userId, int $clientId, ?int $centerId, string $date, float $amount, ?string $notes): bool {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('INSERT INTO receipts (user_id, client_id, receipt_date, amount, notes) VALUES (?, ?, ?, ?, ?)');
-        try { return $stmt->execute([$userId, $clientId, $date, $amount, $notes]); } catch (\PDOException $e) { return false; }
+        $stmt = $pdo->prepare('INSERT INTO receipts (user_id, client_id, cost_center_id, receipt_date, amount, notes) VALUES (?, ?, ?, ?, ?, ?)');
+        try { return $stmt->execute([$userId, $clientId, $centerId, $date, $amount, $notes]); } catch (\PDOException $e) { return false; }
     }
 
     public static function findById(int $id): ?array {
@@ -14,10 +14,10 @@ class Receipt {
         return $rec ?: null;
     }
 
-    public static function update(int $id, int $clientId, string $date, float $amount, ?string $notes): bool {
+    public static function update(int $id, int $clientId, ?int $centerId, string $date, float $amount, ?string $notes): bool {
         $pdo = Database::connection();
-        $stmt = $pdo->prepare('UPDATE receipts SET client_id = ?, receipt_date = ?, amount = ?, notes = ? WHERE id = ?');
-        try { return $stmt->execute([$clientId, $date, $amount, $notes, $id]); } catch (\PDOException $e) { return false; }
+        $stmt = $pdo->prepare('UPDATE receipts SET client_id = ?, cost_center_id = ?, receipt_date = ?, amount = ?, notes = ? WHERE id = ?');
+        try { return $stmt->execute([$clientId, $centerId, $date, $amount, $notes, $id]); } catch (\PDOException $e) { return false; }
     }
 
     public static function delete(int $id): bool {

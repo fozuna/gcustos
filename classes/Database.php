@@ -60,18 +60,30 @@ class Database {
             UNIQUE KEY uniq_supplier_name (name)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
+        // Centros de custos
+        $pdo->exec('CREATE TABLE IF NOT EXISTS cost_centers (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(150) NOT NULL,
+            nickname VARCHAR(100) DEFAULT NULL,
+            notes TEXT DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            UNIQUE KEY uniq_center_name (name)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
         $pdo->exec('CREATE TABLE IF NOT EXISTS costs (
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id INT NOT NULL,
             group_id INT NOT NULL,
             supplier_id INT DEFAULT NULL,
+            cost_center_id INT DEFAULT NULL,
             cost_date DATE NOT NULL,
             description VARCHAR(255) NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             CONSTRAINT fk_costs_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
             CONSTRAINT fk_costs_group FOREIGN KEY (group_id) REFERENCES cost_groups(id) ON DELETE RESTRICT,
-            CONSTRAINT fk_costs_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL
+            CONSTRAINT fk_costs_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL,
+            CONSTRAINT fk_costs_center FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
         // Clientes (recebedores)
@@ -90,6 +102,7 @@ class Database {
         self::ensureInnoDB($pdo, 'users');
         self::ensureInnoDB($pdo, 'clients');
         self::ensureInnoDB($pdo, 'suppliers');
+        self::ensureInnoDB($pdo, 'cost_centers');
 
         $usersIdType = self::idColumnType($pdo, 'users');
         $clientsIdType = self::idColumnType($pdo, 'clients');
@@ -98,14 +111,17 @@ class Database {
             id INT AUTO_INCREMENT PRIMARY KEY,
             user_id ' . $usersIdType . ' NOT NULL,
             client_id ' . $clientsIdType . ' NOT NULL,
+            cost_center_id INT DEFAULT NULL,
             receipt_date DATE NOT NULL,
             amount DECIMAL(10,2) NOT NULL,
             notes TEXT DEFAULT NULL,
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             INDEX idx_receipts_user (user_id),
             INDEX idx_receipts_client (client_id),
+            INDEX idx_receipts_center (cost_center_id),
             CONSTRAINT fk_receipts_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
-            CONSTRAINT fk_receipts_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT
+            CONSTRAINT fk_receipts_client FOREIGN KEY (client_id) REFERENCES clients(id) ON DELETE RESTRICT,
+            CONSTRAINT fk_receipts_center FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE SET NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4';
 
         try {
@@ -132,6 +148,28 @@ class Database {
                 $pdo->exec('ALTER TABLE costs ADD COLUMN supplier_id ' . $suppliersIdType . ' DEFAULT NULL');
                 $pdo->exec('ALTER TABLE costs ADD CONSTRAINT fk_costs_supplier FOREIGN KEY (supplier_id) REFERENCES suppliers(id) ON DELETE SET NULL');
             } catch (\PDOException $e) { /* ignora se já existir ou não suportar */ }
+        }
+
+        // Garantir colunas cost_center_id em costs e receipts (para bases antigas)
+        $stmtCostCenterCosts = $pdo->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = "costs" AND COLUMN_NAME = "cost_center_id"');
+        $stmtCostCenterCosts->execute([DB_NAME]);
+        $hasCenterInCosts = (int)$stmtCostCenterCosts->fetchColumn() > 0;
+        if (!$hasCenterInCosts) {
+            try {
+                self::ensureInnoDB($pdo, 'cost_centers');
+                $pdo->exec('ALTER TABLE costs ADD COLUMN cost_center_id INT DEFAULT NULL');
+                $pdo->exec('ALTER TABLE costs ADD CONSTRAINT fk_costs_center FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE SET NULL');
+            } catch (\PDOException $e) { /* ignora */ }
+        }
+        $stmtCostCenterReceipts = $pdo->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = "receipts" AND COLUMN_NAME = "cost_center_id"');
+        $stmtCostCenterReceipts->execute([DB_NAME]);
+        $hasCenterInReceipts = (int)$stmtCostCenterReceipts->fetchColumn() > 0;
+        if (!$hasCenterInReceipts) {
+            try {
+                self::ensureInnoDB($pdo, 'cost_centers');
+                $pdo->exec('ALTER TABLE receipts ADD COLUMN cost_center_id INT DEFAULT NULL');
+                $pdo->exec('ALTER TABLE receipts ADD CONSTRAINT fk_receipts_center FOREIGN KEY (cost_center_id) REFERENCES cost_centers(id) ON DELETE SET NULL');
+            } catch (\PDOException $e) { /* ignora */ }
         }
     }
 }

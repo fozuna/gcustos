@@ -63,6 +63,9 @@ function render_layout(string $title, string $content): void {
         <a href="groups.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="folder-cog" class="w-5 h-5"></i> <span>Grupos</span>
         </a>
+        <a href="centers.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="rows" class="w-5 h-5"></i> <span>Centros de custos</span>
+        </a>
         <a href="import.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="file-input" class="w-5 h-5"></i> <span>Importar custos</span>
         </a>
