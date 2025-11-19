@@ -213,12 +213,7 @@ ob_start();
   // Comparativo Receitas x Custos
   const receiptsTotal = Number(<?= json_encode($receiptsTotal) ?>);
   const costsTotal = Number(<?= json_encode($totalValue) ?>);
-  const ctxRc = document.getElementById('rcCompareChart').getContext('2d');
-  new Chart(ctxRc, {
-    type: 'bar',
-    data: { labels: ['Receitas', 'Custos'], datasets: [{ data: [receiptsTotal, costsTotal], backgroundColor: ['#2563eb','#ef4444'], borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-  });
+  renderChart('rcCompareChart', 'bar', { labels: ['Receitas', 'Custos'], datasets: [{ data: [receiptsTotal, costsTotal], backgroundColor: ['#2563eb','#ef4444'], borderRadius: 6 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } });
 </script>
 <?php
 $content = ob_get_clean();
