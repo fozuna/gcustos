@@ -11,6 +11,8 @@ $groupId = isset($_GET['group_id']) && $_GET['group_id'] !== '' ? (int)$_GET['gr
 
 $groups = CostGroup::all();
 $monthNames = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
+// Usuário atual (para receitas)
+$userId = (int)($_SESSION['user_id'] ?? 0);
 
 // Dados conforme filtros
 if ($isAllMonths) {
@@ -38,11 +40,24 @@ if ($isAllMonths) {
 $annual = Cost::monthlyTotalsForYear($year, $groupId);
 $totalValue = $isAllMonths ? Cost::totalForYear($year, $groupId) : Cost::totalForMonth($month, $year, $groupId);
 
+// Total de receitas para o mesmo período (por usuário atual)
+$pdo = Database::connection();
+if ($isAllMonths) {
+    $stmtR = $pdo->prepare('SELECT COALESCE(SUM(amount),0) FROM receipts WHERE user_id = ? AND YEAR(receipt_date) = ?');
+    $stmtR->execute([$userId, $year]);
+    $receiptsTotal = (float)$stmtR->fetchColumn();
+} else {
+    $stmtR = $pdo->prepare('SELECT COALESCE(SUM(amount),0) FROM receipts WHERE user_id = ? AND MONTH(receipt_date) = ? AND YEAR(receipt_date) = ?');
+    $stmtR->execute([$userId, $month, $year]);
+    $receiptsTotal = (float)$stmtR->fetchColumn();
+}
+$saldo = $receiptsTotal - (float)$totalValue;
+
 ob_start();
 ?>
 <div class="flex flex-col gap-6">
   <div class="flex items-center justify-between">
-    <h1 class="text-2xl font-semibold text-brand-900">Resumo de Custos</h1>
+    <h1 class="text-2xl font-semibold text-brand-900">Resumo Financeiro</h1>
     <form method="get" class="flex items-end gap-3">
       <div>
         <label class="block text-xs font-medium text-brand-700">Mês</label>
@@ -71,8 +86,9 @@ ob_start();
   </div>
 
   <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+    <!-- Totalizador de Custos -->
     <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
-      <h2 class="text-brand-800 font-medium mb-3">Totalizador (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
+      <h2 class="text-brand-800 font-medium mb-3">Custos (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
       <div class="space-y-1">
         <?php if (!empty($summary)): ?>
           <?php foreach ($summary as $row): ?>
@@ -86,22 +102,41 @@ ob_start();
         <?php endif; ?>
       </div>
       <div class="mt-3 pt-3 border-t border-brand-100 flex items-center justify-between">
-        <span class="text-brand-700">Total geral (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</span>
+        <span class="text-brand-700">Total de custos (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</span>
         <span class="text-2xl font-semibold text-brand-900"><?= h(format_currency($totalValue)) ?></span>
       </div>
       <div class="text-sm text-brand-700 mt-1"><?= $groupId ? 'Grupo selecionado' : 'Todos os grupos' ?></div>
     </div>
-    <div class="col-span-1 xl:col-span-2 bg-white rounded-xl shadow border border-brand-100 p-4">
-      <h2 class="text-brand-800 font-medium mb-2">Total por grupo (<?= $isAllMonths ? 'ano selecionado' : 'mês selecionado' ?>)</h2>
-      <div class="aspect-[2/1]">
-        <canvas id="groupChart"></canvas>
+
+    <!-- Totalizador de Receitas -->
+    <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+      <h2 class="text-brand-800 font-medium mb-3">Receitas (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
+      <div class="space-y-2">
+        <div class="flex items-center justify-between py-1">
+          <span class="text-brand-800">Total de receitas</span>
+          <span class="text-brand-900 font-semibold"><?= h(format_currency($receiptsTotal)) ?></span>
+        </div>
+        <div class="flex items-center justify-between py-1">
+          <span class="text-brand-800">Saldo (Receitas − Custos)</span>
+          <span class="font-semibold" style="color: <?= $saldo >= 0 ? '#166534' : '#991b1b' ?>; "><?= h(format_currency($saldo)) ?></span>
+        </div>
       </div>
     </div>
-    <div class="col-span-1 xl:col-span-3 bg-white rounded-xl shadow border border-brand-100 p-4">
-      <h2 class="text-brand-800 font-medium mb-2"><?= $isAllMonths ? 'Totais mensais (ano selecionado)' : 'Gastos diários (mês selecionado)' ?></h2>
+
+    <!-- Comparativo Receitas x Custos -->
+    <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+      <h2 class="text-brand-800 font-medium mb-2">Receitas x Custos (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
       <div class="aspect-[2/1]">
-        <canvas id="dailyChart"></canvas>
+        <canvas id="rcCompareChart"></canvas>
       </div>
+    </div>
+  </div>
+
+  <!-- Gráfico diário/mensal abaixo -->
+  <div class="col-span-1 xl:col-span-3 bg-white rounded-xl shadow border border-brand-100 p-4">
+    <h2 class="text-brand-800 font-medium mb-2"><?= $isAllMonths ? 'Totais mensais (ano selecionado)' : 'Gastos diários (mês selecionado)' ?></h2>
+    <div class="aspect-[2/1]">
+      <canvas id="dailyChart"></canvas>
     </div>
   </div>
 
@@ -143,64 +178,45 @@ ob_start();
   const summaryData = <?= json_encode($summary, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
   const labels = summaryData.map(s => s.group_name);
   const values = summaryData.map(s => Number(s.total || 0));
+  function renderChart(id, type, data, options) {
+    if (typeof Chart === 'undefined') return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    const ctx = el.getContext('2d');
+    return new Chart(ctx, { type, data, options });
+  }
 
-  const ctxGroup = document.getElementById('groupChart').getContext('2d');
-  new Chart(ctxGroup, {
-    type: 'bar',
-    data: {
-      labels,
-      datasets: [{
-        label: 'R$ por grupo',
-        data: values,
-        backgroundColor: labels.map(() => '#3b82f6'),
-        borderRadius: 4
-      }]
-    },
-    options: {
-      responsive: true,
-      maintainAspectRatio: false,
-      plugins: {
-        legend: { display: false },
-        tooltip: { callbacks: { label: (i) => `R$ ${i.parsed.y.toFixed(2)}` } }
-      },
-      scales: {
-        y: { beginAtZero: true }
-      }
-    }
-  });
+  renderChart('groupChart', 'bar', {
+    labels,
+    datasets: [{ label: 'R$ por grupo', data: values, backgroundColor: labels.map(() => '#3b82f6'), borderRadius: 4 }]
+  }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } });
 
   const isAllMonths = <?= json_encode($isAllMonths) ?>;
-  const ctxDaily = document.getElementById('dailyChart').getContext('2d');
+  const hasDaily = document.getElementById('dailyChart');
   if (!isAllMonths) {
     const dailyData = <?= json_encode($daily, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const dayLabels = dailyData.map(d => new Date(d.day).toLocaleDateString('pt-BR'));
     const dayValues = dailyData.map(d => Number(d.total || 0));
-    new Chart(ctxDaily, {
-      type: 'line',
-      data: { labels: dayLabels, datasets: [{ label: 'R$ diário', data: dayValues, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', tension: 0.3 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-    });
+    if (hasDaily) renderChart('dailyChart', 'line', { labels: dayLabels, datasets: [{ label: 'R$ diário', data: dayValues, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', tension: 0.3 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } });
   } else {
     const annualDataForDaily = <?= json_encode($annual, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
     const monthLabelsDaily = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
     const monthValuesDaily = annualDataForDaily.map(d => Number(d.total || 0));
-    new Chart(ctxDaily, {
-      type: 'line',
-      data: { labels: monthLabelsDaily, datasets: [{ label: 'R$ mensal', data: monthValuesDaily, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', tension: 0.3 }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
-    });
+    if (hasDaily) renderChart('dailyChart', 'line', { labels: monthLabelsDaily, datasets: [{ label: 'R$ mensal', data: monthValuesDaily, borderColor: '#2563eb', backgroundColor: 'rgba(37,99,235,0.15)', tension: 0.3 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } });
   }
 
   const annualData = <?= json_encode($annual, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES) ?>;
   const monthLabels = ['Janeiro','Fevereiro','Março','Abril','Maio','Junho','Julho','Agosto','Setembro','Outubro','Novembro','Dezembro'];
   const monthValues = annualData.map(d => Number(d.total || 0));
-  const ctxAnnual = document.getElementById('annualChart').getContext('2d');
-  new Chart(ctxAnnual, {
+  renderChart('annualChart', 'bar', { labels: monthLabels, datasets: [{ label: 'R$ por mês', data: monthValues, backgroundColor: '#60a5fa', borderRadius: 4 }] }, { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } });
+
+  // Comparativo Receitas x Custos
+  const receiptsTotal = Number(<?= json_encode($receiptsTotal) ?>);
+  const costsTotal = Number(<?= json_encode($totalValue) ?>);
+  const ctxRc = document.getElementById('rcCompareChart').getContext('2d');
+  new Chart(ctxRc, {
     type: 'bar',
-    data: {
-      labels: monthLabels,
-      datasets: [{ label: 'R$ por mês', data: monthValues, backgroundColor: '#60a5fa', borderRadius: 4 }]
-    },
+    data: { labels: ['Receitas', 'Custos'], datasets: [{ data: [receiptsTotal, costsTotal], backgroundColor: ['#2563eb','#ef4444'], borderRadius: 6 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
   });
 </script>
