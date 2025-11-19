@@ -85,9 +85,9 @@ ob_start();
     </form>
   </div>
 
-  <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 items-start">
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 items-start">
     <!-- Totalizador de Custos -->
-    <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+    <div class="bg-white rounded-lg shadow border border-brand-100 p-4">
       <h2 class="text-brand-800 font-medium mb-3">Custos (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
       <div class="space-y-1">
         <?php if (!empty($summary)): ?>
@@ -109,7 +109,7 @@ ob_start();
     </div>
 
     <!-- Totalizador de Receitas -->
-    <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+    <div class="bg-white rounded-lg shadow border border-brand-100 p-4">
       <h2 class="text-brand-800 font-medium mb-3">Receitas (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
       <div class="space-y-2">
         <div class="flex items-center justify-between py-1">
@@ -124,30 +124,30 @@ ob_start();
     </div>
 
     <!-- Comparativo Receitas x Custos -->
-    <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+    <div class="bg-white rounded-lg shadow border border-brand-100 p-4">
       <h2 class="text-brand-800 font-medium mb-2">Receitas x Custos (<?= $isAllMonths ? 'Ano' : 'Mês' ?>)</h2>
-      <div class="aspect-[2/1]">
+      <div style="height:240px">
         <canvas id="rcCompareChart"></canvas>
       </div>
     </div>
   </div>
 
   <!-- Gráfico diário/mensal abaixo -->
-  <div class="col-span-1 xl:col-span-3 bg-white rounded-xl shadow border border-brand-100 p-4">
+  <div class="col-span-1 xl:col-span-3 bg-white rounded-lg shadow border border-brand-100 p-4">
     <h2 class="text-brand-800 font-medium mb-2"><?= $isAllMonths ? 'Totais mensais (ano selecionado)' : 'Gastos diários (mês selecionado)' ?></h2>
-    <div class="aspect-[2/1]">
+    <div style="height:300px">
       <canvas id="dailyChart"></canvas>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+  <div class="bg-white rounded-lg shadow border border-brand-100 p-4">
     <h2 class="text-brand-800 font-medium mb-2">Posição anual (<?= $groupId ? 'Grupo selecionado' : 'Todos os grupos' ?>)</h2>
-    <div class="aspect-[2/1]">
+    <div style="height:300px">
       <canvas id="annualChart"></canvas>
     </div>
   </div>
 
-  <div class="bg-white rounded-xl shadow border border-brand-100 p-4">
+  <div class="bg-white rounded-lg shadow border border-brand-100 p-4">
     <h2 class="text-brand-800 font-medium mb-3">Últimos lançamentos</h2>
     <div class="overflow-x-auto">
       <table class="min-w-full text-sm">
