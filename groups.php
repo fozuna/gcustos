@@ -3,6 +3,7 @@ require_once __DIR__ . '/init.php';
 require_auth();
 
 $message = null; $error = null; $editGroup = null;
+$companies = Company::all();
 
 // Carregar grupo para edição
 if (isset($_GET['edit'])) {
@@ -19,14 +20,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         else { $error = 'Falha ao excluir grupo (há custos vinculados ou erro de banco).'; }
     } else {
         $name = trim($_POST['name'] ?? '');
+        $companyIdRaw = $_POST['company_id'] ?? '';
+        $companyId = ($companyIdRaw !== '' && (int)$companyIdRaw > 0) ? (int)$companyIdRaw : null;
         $action = $_POST['action'] ?? 'create';
         if ($name) {
             if ($action === 'update' && isset($_POST['group_id'])) {
                 $gid = (int)$_POST['group_id'];
-                if (CostGroup::update($gid, $name)) { $message = 'Grupo atualizado com sucesso!'; $editGroup = null; }
+                if (CostGroup::update($gid, $name, $companyId)) { $message = 'Grupo atualizado com sucesso!'; $editGroup = null; }
                 else { $error = 'Falha ao atualizar grupo.'; }
             } else {
-                if (CostGroup::create($name)) $message = 'Grupo criado com sucesso!';
+                if (CostGroup::create($name, $companyId)) $message = 'Grupo criado com sucesso!';
                 else $error = 'Falha ao criar grupo (talvez já exista).';
             }
         } else {
@@ -66,6 +69,15 @@ ob_start();
         <label class="block text-sm font-medium text-brand-800">Nome do grupo</label>
         <input type="text" name="name" required class="mt-1 w-full rounded-lg border border-brand-300 bg-brand-50 text-brand-900 placeholder-brand-400 focus:border-brand-500 focus:ring-brand-500 px-3 py-2" placeholder="Ex.: materiais" value="<?= h($editGroup['name'] ?? '') ?>" />
       </div>
+      <div>
+        <label class="block text-sm font-medium text-brand-800">Empresa</label>
+        <select name="company_id" class="mt-1 w-64 rounded-lg border border-brand-300 bg-brand-50 text-brand-900 focus:border-brand-500 focus:ring-brand-500 px-3 py-2">
+          <option value="">Selecione</option>
+          <?php foreach ($companies as $c): $sel = ($editGroup && isset($editGroup['company_id']) && (int)$editGroup['company_id'] === (int)$c['id']) ? 'selected' : ''; ?>
+            <option value="<?= (int)$c['id'] ?>" <?= $sel ?>><?= h($c['name']) ?></option>
+          <?php endforeach; ?>
+        </select>
+      </div>
       <?php if ($editGroup): ?>
         <a href="groups.php" class="px-3 py-2 rounded-lg border border-brand-300 text-brand-800">Cancelar</a>
         <button type="submit" class="px-4 py-2 rounded-lg bg-brand-700 text-white hover:bg-brand-800">Atualizar</button>
@@ -81,6 +93,7 @@ ob_start();
       <?php foreach ($groups as $g): ?>
         <li class="py-2 flex items-center justify-between">
           <span class="text-brand-900"><?= h($g['name']) ?></span>
+          <span class="text-xs text-brand-700"><?= h($g['company_name'] ?? '') ?></span>
           <div class="flex items-center gap-2">
             <a href="groups.php?edit=<?= (int)$g['id'] ?>" class="px-2 py-1 rounded-md border border-brand-300 text-brand-800 hover:bg-brand-50">Editar</a>
             <form method="post" onsubmit="return confirm('Confirma excluir este grupo?');">

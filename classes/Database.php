@@ -35,6 +35,15 @@ class Database {
     public static function initialize(): void {
         $pdo = self::connection();
 
+        $pdo->exec('CREATE TABLE IF NOT EXISTS companies (
+            id INT AUTO_INCREMENT PRIMARY KEY,
+            name VARCHAR(150) NOT NULL UNIQUE,
+            document VARCHAR(30) DEFAULT NULL,
+            city VARCHAR(120) DEFAULT NULL,
+            phone VARCHAR(60) DEFAULT NULL,
+            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
+
         // Criar tabelas se não existirem
         $pdo->exec('CREATE TABLE IF NOT EXISTS users (
             id INT AUTO_INCREMENT PRIMARY KEY,
@@ -98,11 +107,23 @@ class Database {
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4');
 
         // Ajustes de integridade e FKs
-        // Garantir que tabelas referenciadas estão em InnoDB antes de criar FKs
         self::ensureInnoDB($pdo, 'users');
         self::ensureInnoDB($pdo, 'clients');
         self::ensureInnoDB($pdo, 'suppliers');
         self::ensureInnoDB($pdo, 'cost_centers');
+        self::ensureInnoDB($pdo, 'companies');
+
+        $stmtColCg = $pdo->prepare('SELECT COUNT(*) FROM information_schema.COLUMNS WHERE TABLE_SCHEMA = ? AND TABLE_NAME = "cost_groups" AND COLUMN_NAME = "company_id"');
+        $stmtColCg->execute([DB_NAME]);
+        $hasCompanyInGroups = (int)$stmtColCg->fetchColumn() > 0;
+        if (!$hasCompanyInGroups) {
+            try {
+                $pdo->exec('ALTER TABLE cost_groups ADD COLUMN company_id INT DEFAULT NULL');
+            } catch (\PDOException $e) { }
+            try {
+                $pdo->exec('ALTER TABLE cost_groups ADD CONSTRAINT fk_cost_groups_company FOREIGN KEY (company_id) REFERENCES companies(id) ON DELETE RESTRICT');
+            } catch (\PDOException $e) { }
+        }
 
         $usersIdType = self::idColumnType($pdo, 'users');
         $clientsIdType = self::idColumnType($pdo, 'clients');

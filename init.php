@@ -5,6 +5,7 @@ require_once __DIR__ . '/config.php';
 require_once __DIR__ . '/classes/Database.php';
 require_once __DIR__ . '/classes/User.php';
 require_once __DIR__ . '/classes/Auth.php';
+require_once __DIR__ . '/classes/Company.php';
 require_once __DIR__ . '/classes/CostGroup.php';
 require_once __DIR__ . '/classes/Cost.php';
 require_once __DIR__ . '/classes/Supplier.php';
@@ -28,7 +29,7 @@ $defaultGroups = [
     'Pneus'
 ];
 if (CostGroup::countAll() === 0) {
-    CostGroup::seedDefaults($defaultGroups);
+    CostGroup::seedDefaults($defaultGroups, null);
 }
 
 // Cria usuário padrão na primeira execução (apenas se nenhum existir)

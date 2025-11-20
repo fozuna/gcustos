@@ -108,6 +108,9 @@ function render_layout(string $title, string $content): void {
         <a href="cashflow.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="wallet" class="w-5 h-5"></i> <span>Fluxo de caixa</span>
         </a>
+        <a href="companies.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
+          <i data-lucide="building-2" class="w-5 h-5"></i> <span>Empresas</span>
+        </a>
         <a href="clients.php" class="flex items-center gap-2 px-3 py-2 rounded-md hover:bg-brand-800">
           <i data-lucide="contact" class="w-5 h-5"></i> <span>Clientes</span>
         </a>
